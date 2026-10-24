@@ -161,7 +161,7 @@
       flex-shrink: 0;
     }
 
-    /* Visuele Keuzekaarten (Stamhoogte, Vorm, Fase) */
+    /* Visuele Keuzekaarten */
     .shape-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -349,14 +349,14 @@
         <h2 class="step-title">Boomgegevens & Identificatie</h2>
         <p class="step-subtitle">Gebruik onderstaande links indien nodig om de boom op te zoeken of te determineren.</p>
 
-        <!-- Quick Links -->
+        <!-- Quick Links met jouw exacte URLs -->
         <div class="quick-links">
-          <a href="#" class="quick-link-btn" onclick="alert('Open bomenplattegrond'); return false;">🗺️ Bomenplattegrond</a>
-          <a href="#" class="quick-link-btn" onclick="alert('Open bomenlijst Excel'); return false;">📊 Bomenlijst Excel</a>
-          <a href="#" class="quick-link-btn" onclick="alert('Open AI-boombeheerscoach'); return false;">🤖 AI-boombeheerscoach</a>
-          <a href="#" class="quick-link-btn" onclick="alert('Open plant herkenning'); return false;">🔍 Plant Herkennen</a>
-          <a href="#" class="quick-link-btn" onclick="alert('Open plantenencyclopedie'); return false;">📖 Plantenencyclopedie</a>
-          <a href="#" class="quick-link-btn" onclick="alert('Open actueel weer'); return false;">🌤️ Actueel Weer</a>
+          <a href="https://drive.google.com/file/d/1ZEn3fSTiMg2l23NhVDDG74bUFpoFEtkm/view?usp=sharing" target="_blank" class="quick-link-btn">🗺️ Bomenplattegrond</a>
+          <a href="https://docs.google.com/spreadsheets/d/1C4qMigUwsw0PUCc-cLAgnPAQy3O1ozyT/edit?usp=drive_link&ouid=117457488755669369779&rtpof=true&sd=true" target="_blank" class="quick-link-btn">📊 Bomenlijst Excel</a>
+          <a href="https://notebook.google.com/notebook/ce35512d-a348-4311-8b8e-bf073396ce38?utm_source=gemini_notebook&utm_medium=referral&original_referer=https:%2F%2Fgemini.google.com%23&pli=1" target="_blank" class="quick-link-btn">🤖 AI-boombeheerscoach</a>
+          <a href="https://www.plantidentifieronline.com/nl/tools/tree-identifier" target="_blank" class="quick-link-btn">🔍 Plant Herkennen</a>
+          <a href="https://appeltern.nl/nl/tuinadvies/plantenencyclopedie/" target="_blank" class="quick-link-btn">📖 Plantenencyclopedie</a>
+          <a href="https://www.buienradar.nl" target="_blank" class="quick-link-btn">🌤️ Actueel Weer (Buienradar)</a>
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -581,7 +581,7 @@
         <p class="step-subtitle">Vink aan wat van toepassing is.</p>
 
         <div class="info-box">
-          🤖 <strong>Snelle AI-boomcoach Check:</strong> Open de AI-Boomverzorger om je zojuist gemaakte overzichtsfoto direct te laten beoordelen op kroonstructuur en veiligheid.
+          🤖 <strong>Snelle AI-boomcoach Check:</strong> Open de AI-boombeheerscoach via de link in stap 3 om je overzichtsfoto direct te laten beoordelen op kroonstructuur en veiligheid.
         </div>
 
         <div class="info-box" style="background:#fef3c7; border-color:#fde68a; color:#92400e;">
@@ -615,10 +615,6 @@
         <div class="form-group">
           <label for="snoeiReden">Reden van snoei</label>
           <input type="text" id="snoeiReden" name="snoeiReden" placeholder="Bij observatie bekeken: wat ga je nu veranderen?">
-        </div>
-
-        <div class="info-box">
-          💬 <strong>OPTIONEEL:</strong> Twijfel over gebreken of snoei? Vraag de AI-Boomverzorger om advies voordat je de vinkjes hieronder invult.
         </div>
 
         <label>Wat voor snoei pas je toe? (Toegepaste ingrepen) <span class="req">*</span></label>
@@ -685,7 +681,7 @@
 
         <div class="form-group hidden" id="beheerderOpmerkingenBox">
           <div style="margin-bottom: 10px;">
-            <a href="#" class="quick-link-btn" onclick="alert('Open beheersheet'); return false;">🔗 Link naar Beheersheet</a>
+            <a href="https://docs.google.com/spreadsheets/d/1C4qMigUwsw0PUCc-cLAgnPAQy3O1ozyT/edit?usp=drive_link&ouid=117457488755669369779&rtpof=true&sd=true" target="_blank" class="quick-link-btn">🔗 Link naar Beheersheet Excel</a>
           </div>
           <label for="beheerderOpmerking" style="color: var(--primary-dark);">Beheerder(s)-opmerkingen</label>
           <textarea id="beheerderOpmerking" name="beheerderOpmerking" placeholder="Alleen invullen door planner / beheerder. Vrijwilligers laten dit leeg."></textarea>
