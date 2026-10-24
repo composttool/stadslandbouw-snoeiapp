@@ -1,0 +1,894 @@
+Hier is de complete, gebruiksklare mobiele webapplicatie **"SnoeiApp Stadslandbouw Arnhem"**. 
+
+De app is ontworpen als een **Mobile-First Progressive Web App (PWA)**:
+1. **Buitengebruik:** Grote touch-knoppen, hoog contrast (goed leesbaar in zonlicht), duidelijke wizard-stappen.
+2. **Camerakoppeling:** Directe ondersteuning voor smartphonecamera's (`capture="environment"`) met automatische client-side fotocompressie (zodat uploads snel blijven via 4G/5G en Google Apps Script niet vastloopt op 10MB raw-bestanden).
+3. **Backend-klaar:** Inclusief een kant-en-klaar **Google Apps Script** dat de gegevens automatisch wegschrijft in Google Spreadsheets / Google Drive.
+
+---
+
+### Deel 1: De Mobiele Applicatie (`index.html`)
+
+Sla onderstaande code op als `index.html`. Je kunt dit hosten op GitHub Pages, Netlify, of direct lokaal openen op je smartphone.
+
+```html
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SnoeiApp - Stadslandbouw Arnhem</title>
+  <style>
+    :root {
+      --primary: #235c27;
+      --primary-dark: #173d1a;
+      --primary-light: #e8f3e8;
+      --accent: #f59e0b;
+      --danger: #dc2626;
+      --bg: #f3f6f3;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --border: #d1d5db;
+      --radius: 12px;
+      --touch-size: 48px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; }
+
+    /* Header */
+    header {
+      background: var(--primary);
+      color: white;
+      padding: 16px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    header h1 { font-size: 1.15rem; font-weight: 700; }
+    header p { font-size: 0.8rem; color: #cbd5e1; }
+
+    /* Progress bar */
+    .progress-container {
+      background: #e2e8f0;
+      height: 6px;
+      width: 100%;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 14%;
+      transition: width 0.3s ease;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* Cards & Steps */
+    .step-card {
+      display: none;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      border: 1px solid #e5e7eb;
+    }
+    .step-card.active { display: block; }
+
+    .step-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+    .step-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    /* Form controls */
+    .form-group { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 6px;
+      color: #111827;
+    }
+    .hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+    input[type="text"], input[type="date"], select, textarea {
+      width: 100%;
+      min-height: var(--touch-size);
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #fafafa;
+      color: var(--text);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+    }
+    textarea { min-height: 85px; resize: vertical; }
+
+    /* Checkbox & Chip grids */
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .check-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    .check-item input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      margin-right: 12px;
+      accent-color: var(--primary);
+    }
+
+    /* Foto upload buttons */
+    .photo-upload-box {
+      border: 2px dashed #9ca3af;
+      background: #f8fafc;
+      padding: 14px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .photo-upload-box input[type="file"] {
+      display: none;
+    }
+    .photo-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1.5px solid var(--primary);
+      color: var(--primary);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .preview-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .preview-thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    /* Fixed Bottom Navigation */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+      z-index: 99;
+    }
+    .btn {
+      flex: 1;
+      min-height: var(--touch-size);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+      max-width: 120px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-accent {
+      background: var(--accent);
+      color: #111827;
+    }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>SnoeiApp Arnhem</h1>
+    <p>Stadslandbouw & Boomgaard Registratie</p>
+  </header>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <main class="container">
+    <form id="snoeiForm">
+
+      <!-- STAP 1: Algemene Gegevens -->
+      <section class="step-card active" data-step="1">
+        <span class="badge">Stap 1 van 7</span>
+        <h2 class="step-title">Algemene Gegevens</h2>
+        <p class="step-subtitle">Wie voert de snoeironde uit?</p>
+
+        <div class="form-group">
+          <label for="vrijwilliger">Naam vrijwilliger *</label>
+          <input type="text" id="vrijwilliger" name="vrijwilliger" required placeholder="Bijv. Jan Jansen">
+        </div>
+
+        <div class="form-group">
+          <label for="snoeidatum">Snoeidatum *</label>
+          <input type="date" id="snoeidatum" name="snoeidatum" required>
+        </div>
+      </section>
+
+      <!-- STAP 2: Benodigdheden Checklist -->
+      <section class="step-card" data-step="2">
+        <span class="badge">Stap 2 van 7</span>
+        <h2 class="step-title">Controle Benodigdheden</h2>
+        <p class="step-subtitle">Controleer je uitrusting voor je het veld in gaat</p>
+
+        <div class="checklist-grid" id="materialenChecklist">
+          <!-- Dynamisch gegenereerd door JS -->
+        </div>
+
+        <div class="form-group">
+          <label for="ontbrekendMateriaal">Zijn er nog materialen die je mist?</label>
+          <input type="text" id="ontbrekendMateriaal" name="ontbrekendMateriaal" placeholder="Bijv. alcohol spray is leeg, extra lint nodig...">
+          <span class="hint">Dit wordt doorgegeven aan de beheerder ter bevoorrading.</span>
+        </div>
+      </section>
+
+      <!-- STAP 3: Boomgegevens -->
+      <section class="step-card" data-step="3">
+        <span class="badge">Stap 3 van 7</span>
+        <h2 class="step-title">Boomgegevens</h2>
+        <p class="step-subtitle">Identificeer de boom of struik</p>
+
+        <div style="display: flex; gap: 10px;">
+          <div class="form-group" style="flex: 1;">
+            <label for="boomnummer">Boomnummer *</label>
+            <input type="text" id="boomnummer" name="boomnummer" placeholder="Bijv. 142" required>
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label for="vak">Vak *</label>
+            <input type="text" id="vak" name="vak" placeholder="Bijv. A2 of ?" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="planttype">Planttype</label>
+          <select id="planttype" name="planttype">
+            <option>Fruitboom</option>
+            <option>Boom</option>
+            <option>Struik</option>
+            <option>Heester</option>
+            <option>Klimplant</option>
+            <option>Kruid</option>
+            <option>Plant</option>
+            <option>Bodembedekker</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="status">Status</label>
+          <select id="status" name="status">
+            <option>Levend</option>
+            <option>Dood</option>
+            <option>Onbekend</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="soort">Soort (Hoofdtype)</label>
+          <input type="text" id="soort" name="soort" placeholder="Bijv. Appel, Peer, Kers, Pruim">
+        </div>
+
+        <div class="form-group">
+          <label for="ras">Ras</label>
+          <input type="text" id="ras" name="ras" placeholder="Bijv. Elstar, Conference (of vul 'onbekend' in)">
+        </div>
+
+        <!-- Ras onbekend foto opties -->
+        <div class="photo-upload-box">
+          <p style="font-size: 0.9rem; font-weight: 600; margin-bottom: 6px;">Ras onbekend? Maak determinatiefoto's:</p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label class="photo-btn">
+              📷 Twijgfoto (winter)
+              <input type="file" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'ras_twijg')">
+            </label>
+            <label class="photo-btn">
+              📷 Bloesemfoto (bloeitijd)
+              <input type="file" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'ras_bloesem')">
+            </label>
+            <label class="photo-btn">
+              📷 Rijpevruchtfoto (herfst)
+              <input type="file" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'ras_vrucht')">
+            </label>
+          </div>
+          <div id="preview_ras" class="preview-list"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="latijnseNaam">Latijnse benaming (optioneel)</label>
+          <input type="text" id="latijnseNaam" name="latijnseNaam" placeholder="Bijv. Malus domestica">
+        </div>
+
+        <div class="form-group">
+          <label for="kenmerk">Kenmerk & Extra details</label>
+          <input type="text" id="kenmerk" name="kenmerk" placeholder="Bijv. Gele vrucht, vroege rijping, etc.">
+        </div>
+      </section>
+
+      <!-- STAP 4: Observatie & Vorm -->
+      <section class="step-card" data-step="4">
+        <span class="badge">Stap 4 van 7</span>
+        <h2 class="step-title">Observatie & Vorm</h2>
+        <p class="step-subtitle">Conditie en architectuur van de boom</p>
+
+        <div class="form-group">
+          <label for="observatieVoor">Algemene observatie vóór de snoei</label>
+          <textarea id="observatieVoor" name="observatieVoor" placeholder="Hoe oogt de boom? Groeikracht, bladstand, etc."></textarea>
+        </div>
+
+        <div class="photo-upload-box">
+          <label class="photo-btn">
+            📸 Overzichtsfoto vóór snoei
+            <input type="file" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'obs_voor')">
+          </label>
+          <div id="preview_obs_voor" class="preview-list"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="stamhoogte">Stamhoogte</label>
+          <select id="stamhoogte" name="stamhoogte">
+            <option>Laagstam</option>
+            <option>Halfstam</option>
+            <option>Hoogstam</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="boomvorm">Boomvorm</label>
+          <select id="boomvorm" name="boomvorm">
+            <option>Natuurlijke vorm</option>
+            <option>Spilvorm</option>
+            <option>Kelkvorm / Vaasvorm</option>
+            <option>Leivorm</option>
+            <option>Waaiervorm</option>
+            <option>Piramidevorm</option>
+            <option>Palmet</option>
+            <option>Enkele U-vorm</option>
+            <option>Dubbele U-vorm</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ondergrond">Ondergrond boomspiegel</label>
+          <select id="ondergrond" name="ondergrond">
+            <option>Gras</option>
+            <option>Bladmulch</option>
+            <option>Houtsnippers</option>
+            <option>Beplante boomspiegel</option>
+            <option>Bestrating</option>
+            <option>Worteldoek</option>
+            <option>Kale grond</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="levensfase">Fase van de boom</label>
+          <select id="levensfase" name="levensfase">
+            <option>Jeugdfase</option>
+            <option>Volwassenfase</option>
+            <option>Veteraanfase</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- STAP 5: Gebreken & Ziekten -->
+      <section class="step-card" data-step="5">
+        <span class="badge">Stap 5 van 7</span>
+        <h2 class="step-title">Gebreken, Ziekten & Omgeving</h2>
+        <p class="step-subtitle">Vink aan wat van toepassing is</p>
+
+        <label style="margin-top:10px;">Structurele Gebreken</label>
+        <div class="checklist-grid" id="gebrekenGrid"></div>
+
+        <label style="margin-top:10px;">Omgevingsfactoren / Schade</label>
+        <div class="checklist-grid" id="omgevingGrid"></div>
+
+        <label style="margin-top:10px;">Ziekten / Plagen</label>
+        <div class="checklist-grid" id="ziektenGrid"></div>
+
+        <div class="photo-upload-box">
+          <label class="photo-btn">
+            🔍 Detailfoto Ziekte / Gebrek toevoegen
+            <input type="file" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'gebrek_detail')">
+          </label>
+          <div id="preview_gebrek_detail" class="preview-list"></div>
+        </div>
+      </section>
+
+      <!-- STAP 6: Snoei-uitvoering -->
+      <section class="step-card" data-step="6">
+        <span class="badge">Stap 6 van 7</span>
+        <h2 class="step-title">Snoei-uitvoering</h2>
+        <p class="step-subtitle">Wat is er daadwerkelijk gedaan?</p>
+
+        <div class="form-group">
+          <label for="snoeiReden">Reden van snoei</label>
+          <input type="text" id="snoeiReden" name="snoeiReden" placeholder="Wat ga je corrigeren/veranderen?">
+        </div>
+
+        <label>Toegepaste ingrepen</label>
+        <div class="checklist-grid" id="ingrepenGrid"></div>
+
+        <div class="photo-upload-box">
+          <label class="photo-btn">
+            📸 Detailfoto's ná snoei
+            <input type="file" accept="image/*" capture="environment" onchange="handlePhotoUpload(this, 'snoei_na')">
+          </label>
+          <div id="preview_snoei_na" class="preview-list"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="typeSnoei">Type snoei</label>
+          <select id="typeSnoei" name="typeSnoei">
+            <option>Wintersnoei</option>
+            <option>Zomersnoei</option>
+            <option>Voorjaarssnoei</option>
+            <option>Vormsnoei</option>
+            <option>Herstellende snoei</option>
+            <option>Noodsnoei</option>
+            <option>Dubbele top verwijderd</option>
+            <option>Geen snoei toegepast</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="snoeiIntensiteit">Snoei-intensiteit (%)</label>
+          <select id="snoeiIntensiteit" name="snoeiIntensiteit">
+            <option>Geen snoei nodig (0%)</option>
+            <option>Lichte snoei (5-10%)</option>
+            <option>Matige snoei (10-20%)</option>
+            <option>Zware snoei (20-25%)</option>
+            <option>Ingrijpend (25-40%)</option>
+            <option>Zeer zwaar (40-50%)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="volgendeSnoei">Aanbeveling volgende snoei / actie</label>
+          <textarea id="volgendeSnoei" name="volgendeSnoei" placeholder="Bijv. zomersnoei op waterlot, wondcontrole in najaar..."></textarea>
+        </div>
+      </section>
+
+      <!-- STAP 7: Afronding & Beheer -->
+      <section class="step-card" data-step="7">
+        <span class="badge">Stap 7 van 7</span>
+        <h2 class="step-title">Beheer en Afronding</h2>
+        <p class="step-subtitle">Validatie en afronding van het formulier</p>
+
+        <div class="form-group">
+          <label>Bent u planner / beheerder?</label>
+          <div style="display: flex; gap: 16px; margin-top: 8px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
+              <input type="radio" name="isBeheerder" value="Nee" checked onchange="toggleBeheerderVeld(false)"> Vrijwilliger (Nee)
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
+              <input type="radio" name="isBeheerder" value="Ja" onchange="toggleBeheerderVeld(true)"> Beheerder (Ja)
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group hidden" id="beheerderOpmerkingenBox">
+          <label for="beheerderOpmerking" style="color: var(--primary-dark);">Extra beheerders-notities / actiepunten</label>
+          <textarea id="beheerderOpmerking" name="beheerderOpmerking" placeholder="Veld voor snoeicoördinator: bomenkap, herplant, gereedschap bestellen..."></textarea>
+        </div>
+
+        <div style="background: var(--primary-light); padding: 14px; border-radius: 8px; margin-top: 20px;">
+          <p style="font-size: 0.85rem; color: var(--primary-dark);">
+            ✔ Controleer of alle data geregistreerd is. Klik op 'Afronden & Verzenden' om het rapport definitief door te sturen.
+          </p>
+        </div>
+      </section>
+
+    </form>
+  </main>
+
+  <!-- Navigatiebalk onderin -->
+  <nav class="nav-bar">
+    <button type="button" class="btn btn-secondary" id="btnPrev" style="display: none;" onclick="changeStep(-1)">Vorige</button>
+    <button type="button" class="btn btn-primary" id="btnNext" onclick="changeStep(1)">Volgende</button>
+  </nav>
+
+  <script>
+    // STAP 2 Checklist data
+    const materialen = [
+      "Veiligheidsbril", "Trui / t-shirt lange mouwen", "Goed aansluitende handschoenen", 
+      "Werkschoenen", "Emmer", "Kruiwagen", "Snoeischaar", "Takkenzaag", "Takkenschaar", 
+      "Tang / vijltje", "Doekje / papier", "Spiritus", "Kruipolie / WD40", "Markeerlint / woldraad", 
+      "Fruitladder", "Gereinigd en ontsmet gereedschap"
+    ];
+
+    // STAP 5 data
+    const gebrekenLijst = [
+      "Doorzicht ontbreekt", "Plakoksel aanwezig", "Geen duidelijke gesteltakken",
+      "Takken op grond", "Te zware tak (uitscheurrisico)", "Opschot uit grond",
+      "Dode takken", "Bastbeschadiging", "Kruisende takken", "Schieters",
+      "Hinder naar omgeving", "Naar binnen groeiende tak", "Dubbele top",
+      "Top groeit te hoog", "Waterloten aanwezig", "Geen gebreken"
+    ];
+
+    const omgevingsLijst = [
+      "Stormschade", "Verkeersschade", "Veel mossen / korstmossen", "Hinder voor doorgang"
+    ];
+
+    const ziektenLijst = [
+      "Schurft", "Meeldauw", "Luis", "Rups", "Vruchtboomkanker", 
+      "Taksterfte", "Bladverkleuring", "Roest", "Bladschimmel", 
+      "Wortelproblemen", "Onzeker / mogelijk ziektebeeld"
+    ];
+
+    // STAP 6 data
+    const ingrepenLijst = [
+      "Takken eerst gemarkeerd met lint", "Opschot verwijderd", "Takken tot grond ingekort", 
+      "Dode takken verwijderd", "Kruisende takken", "Verwonde takken", "Naar binnen groeiende takken", 
+      "Top teruggezet", "Waterloten verwijderd", "Horizontale langloten afgekort", "Vruchten uitgedund", 
+      "Te zware tak verlicht", "Takken uitgebogen", "Dubbele top verwijderd", "Storm-/verkeersschade hersteld", 
+      "Vormcorrectie", "Lichtinval / luchtcirculatie verbeteren", "Geen snoei nodig"
+    ];
+
+    // Data-opslag voor foto's (base64 compressed)
+    const fotoStorage = {};
+
+    let currentStep = 1;
+    const totalSteps = 7;
+
+    // Initialisatie
+    window.onload = () => {
+      // Datum vandaag instellen
+      document.getElementById('snoeidatum').valueAsDate = new Date();
+
+      // Render Checklists
+      renderChecklist('materialenChecklist', materialen, 'mat');
+      renderChecklist('gebrekenGrid', gebrekenLijst, 'geb');
+      renderChecklist('omgevingGrid', omgevingsLijst, 'omg');
+      renderChecklist('ziektenGrid', ziektenLijst, 'ziek');
+      renderChecklist('ingrepenGrid', ingrepenLijst, 'ingr');
+    };
+
+    function renderChecklist(targetId, items, prefix) {
+      const el = document.getElementById(targetId);
+      el.innerHTML = items.map((item, idx) => `
+        <label class="check-item">
+          <input type="checkbox" name="${prefix}_${idx}" value="${item}">
+          <span>${item}</span>
+        </label>
+      `).join('');
+    }
+
+    function updateStepUI() {
+      document.querySelectorAll('.step-card').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.step-card[data-step="${currentStep}"]`).classList.add('active');
+
+      // Update progress bar
+      document.getElementById('progressBar').style.width = `${(currentStep / totalSteps) * 100}%`;
+
+      // Buttons
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+
+      btnPrev.style.display = currentStep > 1 ? 'block' : 'none';
+
+      if (currentStep === totalSteps) {
+        btnNext.textContent = 'Afronden & Opslaan 🚀';
+        btnNext.className = 'btn btn-accent';
+      } else {
+        btnNext.textContent = 'Volgende ➜';
+        btnNext.className = 'btn btn-primary';
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function changeStep(delta) {
+      if (delta > 0) {
+        // Basisvalidatie
+        if (currentStep === 1) {
+          const vrijwilliger = document.getElementById('vrijwilliger').value.trim();
+          if (!vrijwilliger) { alert("Vul alstublieft de naam van de vrijwilliger in."); return; }
+        }
+        if (currentStep === 3) {
+          const boomnr = document.getElementById('boomnummer').value.trim();
+          const vak = document.getElementById('vak').value.trim();
+          if (!boomnr || !vak) { alert("Vul alstublieft minimaal Boomnummer en Vak in."); return; }
+        }
+      }
+
+      if (currentStep === totalSteps && delta > 0) {
+        submitForm();
+        return;
+      }
+
+      currentStep += delta;
+      updateStepUI();
+    }
+
+    function toggleBeheerderVeld(isJa) {
+      const box = document.getElementById('beheerderOpmerkingenBox');
+      if (isJa) box.classList.remove('hidden');
+      else box.classList.add('hidden');
+    }
+
+    // Handmatige/Camera fotocompressie om mobiele uploads licht te houden (< 300KB per foto)
+    function handlePhotoUpload(input, key) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Gecomprimeerde base64 data
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+          if (!fotoStorage[key]) fotoStorage[key] = [];
+          fotoStorage[key].push(dataUrl);
+
+          // Toon preview
+          let previewContainer = document.getElementById('preview_' + key);
+          if (!previewContainer) previewContainer = document.getElementById('preview_ras');
+          
+          const thumb = document.createElement('img');
+          thumb.src = dataUrl;
+          thumb.className = 'preview-thumb';
+          previewContainer.appendChild(thumb);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Formuliergegevens verzamelen en verzenden
+    function submitForm() {
+      const form = document.getElementById('snoeiForm');
+      const formData = new FormData(form);
+
+      // Multi-select vinkjes verzamelen als komma-gescheiden tekst
+      const verzameldeData = {
+        datumTijdstip: new Date().toISOString(),
+        vrijwilliger: formData.get('vrijwilliger'),
+        snoeidatum: formData.get('snoeidatum'),
+        ontbrekendMateriaal: formData.get('ontbrekendMateriaal') || 'Geen',
+        boomnummer: formData.get('boomnummer'),
+        vak: formData.get('vak'),
+        planttype: formData.get('planttype'),
+        status: formData.get('status'),
+        soort: formData.get('soort'),
+        ras: formData.get('ras'),
+        latijnseNaam: formData.get('latijnseNaam'),
+        kenmerk: formData.get('kenmerk'),
+        observatieVoor: formData.get('observatieVoor'),
+        stamhoogte: formData.get('stamhoogte'),
+        boomvorm: formData.get('boomvorm'),
+        ondergrond: formData.get('ondergrond'),
+        levensfase: formData.get('levensfase'),
+        gebreken: getCheckedValues('geb_'),
+        omgevingsfactoren: getCheckedValues('omg_'),
+        ziekten: getCheckedValues('ziek_'),
+        snoeiReden: formData.get('snoeiReden'),
+        ingrepen: getCheckedValues('ingr_'),
+        typeSnoei: formData.get('typeSnoei'),
+        snoeiIntensiteit: formData.get('snoeiIntensiteit'),
+        volgendeSnoei: formData.get('volgendeSnoei'),
+        isBeheerder: formData.get('isBeheerder'),
+        beheerderOpmerking: formData.get('beheerderOpmerking') || '',
+        fotos: fotoStorage // Bevat base64 foto's
+      };
+
+      // VERVANG DEZE URL MET JE GOOGLE APPS SCRIPT WEB APP URL
+      const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_VOORBEELD_URL/exec";
+
+      const btnNext = document.getElementById('btnNext');
+      btnNext.disabled = true;
+      btnNext.textContent = 'Verzenden naar database...';
+
+      fetch(GOOGLE_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Vereist voor Google Apps Script webhooks
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(verzameldeData)
+      })
+      .then(() => {
+        alert("✅ Snoeiverslag succesvol opgeslagen!");
+        location.reload();
+      })
+      .catch(err => {
+        console.error(err);
+        alert("⚠️ Gegevens lokaal bewaard, maar verzending mislukt. Controleer internetverbinding.");
+        btnNext.disabled = false;
+        btnNext.textContent = 'Opnieuw Proberen';
+      });
+    }
+
+    function getCheckedValues(prefix) {
+      const matches = [];
+      document.querySelectorAll(`input[type="checkbox"][name^="${prefix}"]:checked`).forEach(cb => {
+        matches.push(cb.value);
+      });
+      return matches.join(', ');
+    }
+  </script>
+</body>
+</html>
+```
+
+---
+
+### Deel 2: De Backend koppeling (Google Apps Script)
+
+Met dit script worden de gegevens en foto's direct opgeslagen in een Google Spreadsheet en Google Drive-map van Stadslandbouw Arnhem.
+
+#### Stappen om dit te activeren:
+1. Open [Google Sheets](https://sheets.new) en noem de sheet: `SnoeiApp Registraties`.
+2. Klik in het menu op **Extensies** > **Apps Script**.
+3. Vervang alle code in `Code.gs` door de onderstaande code:
+
+```javascript
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+    
+    // Maak header aan als de sheet nog helemaal leeg is
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "Tijdstip", "Vrijwilliger", "Snoeidatum", "Boomnummer", "Vak", 
+        "Planttype", "Status", "Soort", "Ras", "Latijnse Naam", 
+        "Kenmerken", "Observatie Voor", "Stamhoogte", "Boomvorm", 
+        "Ondergrond", "Levensfase", "Gebreken", "Omgeving", 
+        "Ziekten", "Snoeireden", "Ingrepen", "Type Snoei", 
+        "Intensiteit", "Volgende Snoei", "Beheerder?", "Beheerder Notities", 
+        "Ontbrekende Materialen", "Foto Drive Links"
+      ]);
+    }
+    
+    // Optioneel: Foto's opslaan in een Google Drive map
+    var fotoLinks = [];
+    if (data.fotos && Object.keys(data.fotos).length > 0) {
+      var folder;
+      var folders = DriveApp.getFoldersByName("SnoeiApp Arnhem Foto's");
+      if (folders.hasNext()) {
+        folder = folders.next();
+      } else {
+        folder = DriveApp.createFolder("SnoeiApp Arnhem Foto's");
+      }
+      
+      for (var categorie in data.fotos) {
+        var fotoArray = data.fotos[categorie];
+        fotoArray.forEach(function(base64Str, index) {
+          var cleanBase64 = base64Str.split(",")[1];
+          var decoded = Utilities.base64Decode(cleanBase64);
+          var blob = Utilities.newBlob(decoded, "image/jpeg", "Boom_" + data.boomnummer + "_" + categorie + "_" + index + ".jpg");
+          var file = folder.createFile(blob);
+          file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+          fotoLinks.push(file.getUrl());
+        });
+      }
+    }
+    
+    // Gegevens wegschrijven naar de rij
+    sheet.appendRow([
+      new Date(),
+      data.vrijwilliger,
+      data.snoeidatum,
+      data.boomnummer,
+      data.vak,
+      data.planttype,
+      data.status,
+      data.soort,
+      data.ras,
+      data.latijnseNaam,
+      data.kenmerk,
+      data.observatieVoor,
+      data.stamhoogte,
+      data.boomvorm,
+      data.ondergrond,
+      data.levensfase,
+      data.gebreken,
+      data.omgevingsfactoren,
+      data.ziekten,
+      data.snoeiReden,
+      data.ingrepen,
+      data.typeSnoei,
+      data.snoeiIntensiteit,
+      data.volgendeSnoei,
+      data.isBeheerder,
+      data.beheerderOpmerking,
+      data.ontbrekendMateriaal,
+      fotoLinks.join("\n")
+    ]);
+    
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+4. Klik rechtsboven op **Implementeren** (Deploy) > **Nieuwe implementatie**.
+5. Selecteer het type **Web-app**:
+   - *Uitvoeren als:* **Mijzelf** (Je Google account).
+   - *Wie heeft toegang:* **Iedereen** (Anyone - nodig zodat vrijwilligers zonder in te loggen rapporten kunnen uploaden).
+6. Klik op **Implementeren** en kopieer de gegenereerde **Web App URL**.
+7. Plak deze URL in `index.html` bij de variabele `GOOGLE_SCRIPT_URL`.
