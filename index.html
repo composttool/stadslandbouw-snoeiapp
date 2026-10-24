@@ -98,10 +98,11 @@
       font-weight: 600;
       background: white;
       color: var(--primary-dark);
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 6px;
       border: 1px solid #86efac;
       text-decoration: none;
+      cursor: pointer;
     }
     .quick-link-btn:hover { background: #dcfce7; }
 
@@ -118,6 +119,7 @@
       font-weight: 600;
       text-decoration: none;
       margin-top: 8px;
+      cursor: pointer;
     }
     .inline-link-btn:hover { background: var(--primary-dark); }
 
@@ -367,12 +369,12 @@
 
         <!-- Quick Links -->
         <div class="quick-links">
-          <a href="https://drive.google.com/file/d/1ZEn3fSTiMg2l23NhVDDG74bUFpoFEtkm/view?usp=sharing" target="_blank" class="quick-link-btn">🗺️ BOMENPLATTEGROND</a>
-          <a href="https://docs.google.com/spreadsheets/d/1uFEJ3hBNIQRac3587Zp8pEvRygNYsxjrrv0KvLLAOVg/edit?usp=drive_link" target="_blank" class="quick-link-btn">📊 BOMENLIJST EXCEL / BEHEERSHEET</a>
-          <a href="https://notebook.google.com/notebook/ce35512d-a348-4311-8b8e-bf073396ce38?utm_source=gemini_notebook&utm_medium=referral&original_referer=https:%2F%2Fgemini.google.com%23&pli=1" target="_blank" class="quick-link-btn">🤖 AI-boombeheerscoach</a>
-          <a href="https://www.plantidentifieronline.com/nl/tools/tree-identifier" target="_blank" class="quick-link-btn">🔍 PLANT LATEN HERKENNEN</a>
-          <a href="https://appeltern.nl/nl/tuinadvies/plantenencyclopedie/" target="_blank" class="quick-link-btn">📖 Plantenencyclopedie</a>
-          <a href="https://www.buienradar.nl" target="_blank" class="quick-link-btn">🌤️ ACTUEEL WEER KOMENDE DRIE UUR</a>
+          <button type="button" onclick="openExternalLink('https://drive.google.com/file/d/1ZEn3fSTiMg2l23NhVDDG74bUFpoFEtkm/view?usp=sharing')" class="quick-link-btn">🗺️ BOMENPLATTEGROND</button>
+          <button type="button" onclick="openExternalLink('https://docs.google.com/spreadsheets/d/1uFEJ3hBNIQRac3587Zp8pEvRygNYsxjrrv0KvLLAOVg/edit?usp=drive_link')" class="quick-link-btn">📊 BOMENLIJST EXCEL / BEHEERSHEET</button>
+          <button type="button" onclick="openExternalLink('https://notebook.google.com/notebook/ce35512d-a348-4311-8b8e-bf073396ce38?utm_source=gemini_notebook&utm_medium=referral&original_referer=https:%2F%2Fgemini.google.com%23&pli=1')" class="quick-link-btn">🤖 AI-boombeheerscoach</button>
+          <button type="button" onclick="openExternalLink('https://www.plantidentifieronline.com/nl/tools/tree-identifier')" class="quick-link-btn">🔍 PLANT LATEN HERKENNEN</button>
+          <button type="button" onclick="openExternalLink('https://appeltern.nl/nl/tuinadvies/plantenencyclopedie/')" class="quick-link-btn">📖 Plantenencyclopedie</button>
+          <button type="button" onclick="openExternalLink('https://www.buienradar.nl')" class="quick-link-btn">🌤️ ACTUEEL WEER KOMENDE DRIE UUR</button>
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -416,8 +418,8 @@
           <input type="text" id="soort" name="soort" required placeholder="Bijv. Appel, Peer, Pruim">
           <span class="hint">Kies de soort van de boom. Soort = hoofdtype (bijv. appel). Ras komt in het volgende veld.</span>
           <div style="margin-top: 6px; display: flex; gap: 8px; flex-wrap: wrap;">
-            <a href="https://www.plantidentifieronline.com/nl/tools/tree-identifier" target="_blank" class="quick-link-btn">🔗 PLANT LATEN HERKENNEN VIA WEBSITE</a>
-            <a href="https://appeltern.nl/nl/tuinadvies/plantenencyclopedie/" target="_blank" class="quick-link-btn">🔗 Plantenencyclopedie</a>
+            <button type="button" onclick="openExternalLink('https://www.plantidentifieronline.com/nl/tools/tree-identifier')" class="quick-link-btn">🔗 PLANT LATEN HERKENNEN VIA WEBSITE</button>
+            <button type="button" onclick="openExternalLink('https://appeltern.nl/nl/tuinadvies/plantenencyclopedie/')" class="quick-link-btn">🔗 Plantenencyclopedie</button>
           </div>
         </div>
 
@@ -562,17 +564,10 @@
           </div>
         </div>
 
+        <!-- AANPASSING: Ondergrond als checklist i.p.v. dropdown -->
         <div class="form-group">
-          <label for="ondergrond">Wat voor ondergrond boomspiegel tref je aan?</label>
-          <select id="ondergrond" name="ondergrond">
-            <option>Gras</option>
-            <option>Bladmulch</option>
-            <option>Houtsnippers</option>
-            <option>Bestrating</option>
-            <option>Beplante boomspiegel</option>
-            <option>Worteldoek</option>
-            <option>Kale grond</option>
-          </select>
+          <label>Wat voor ondergrond boomspiegel tref je aan? (meerdere mogelijk)</label>
+          <div class="checklist-grid" id="ondergrondGrid"></div>
         </div>
 
         <!-- Levensfase met visuele keuzekaarten -->
@@ -605,7 +600,7 @@
         <div class="info-box">
           🤖 <strong>Snelle AI-boomcoach-Check:</strong><br>
           Open de AI-Boomverzorger om je zojuist gemaakte overzichtsfoto direct te laten beoordelen op kroonstructuur en veiligheid.<br>
-          <a href="https://notebook.google.com/notebook/ce35512d-a348-4311-8b8e-bf073396ce38?utm_source=gemini_notebook&utm_medium=referral&original_referer=https:%2F%2Fgemini.google.com%23&pli=1" target="_blank" class="inline-link-btn">🤖 Open AI-Boomverzorger</a>
+          <button type="button" onclick="openExternalLink('https://notebook.google.com/notebook/ce35512d-a348-4311-8b8e-bf073396ce38?utm_source=gemini_notebook&utm_medium=referral&original_referer=https:%2F%2Fgemini.google.com%23&pli=1')" class="inline-link-btn">🤖 Open AI-Boomverzorger</button>
         </div>
 
         <label>Gebreken / structuurproblemen <span class="req">*</span></label>
@@ -620,8 +615,8 @@
         <label style="margin-top:16px;">Ziekte / Gebreken</label>
 
         <div style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;">
-          <a href="https://fruitbomen.net/informatie/ziekten-en-plagen/per-fruitsoort" target="_blank" class="quick-link-btn" style="width: fit-content;">🔗 Zie website voor meest voorkomende ziekten per fruitsoort</a>
-          <a href="https://identify.plantnet.org/nl/diseases-and-pests" target="_blank" class="quick-link-btn" style="width: fit-content;">🔗 Zie website AI identificatie ziekte (PlantNet)</a>
+          <button type="button" onclick="openExternalLink('https://fruitbomen.net/informatie/ziekten-en-plagen/per-fruitsoort')" class="quick-link-btn" style="width: fit-content;">🔗 Zie website voor meest voorkomende ziekten per fruitsoort</button>
+          <button type="button" onclick="openExternalLink('https://identify.plantnet.org/nl/diseases-and-pests')" class="quick-link-btn" style="width: fit-content;">🔗 Zie website AI identificatie ziekte (PlantNet)</button>
         </div>
         <div class="checklist-grid" id="ziektenGrid"></div>
 
@@ -650,7 +645,7 @@
           Twijfel over gebreken of snoei? Vraag de AI-Boomverzorger om advies voordat je de vinkjes hieronder invult.<br>
           1. Tik op het camera-icoontje, maak een overzichtsfoto van de boom en druk op versturen.<br>
           2. Bekijk de analyse over de kroon, waterlot, lichtinval én veiligheid, en gebruik deze inzichten bij je verdere observatie hieronder.<br>
-          <a href="https://notebook.google.com/notebook/ce35512d-a348-4311-8b8e-bf073396ce38?utm_source=gemini_notebook&utm_medium=referral&original_referer=https:%2F%2Fgemini.google.com%23&pli=1" target="_blank" class="inline-link-btn" style="background: #166534;">💬 Sparren met AI-Boomverzorger</a>
+          <button type="button" onclick="openExternalLink('https://notebook.google.com/notebook/ce35512d-a348-4311-8b8e-bf073396ce38?utm_source=gemini_notebook&utm_medium=referral&original_referer=https:%2F%2Fgemini.google.com%23&pli=1')" class="inline-link-btn" style="background: #166534;">💬 Sparren met AI-Boomverzorger</button>
         </div>
 
         <label>Wat voor snoei pas je toe? <span class="req">*</span></label>
@@ -740,7 +735,7 @@
         <div class="form-group hidden" id="beheerderOpmerkingenBox">
           <h3 style="font-size: 1.05rem; color: var(--primary-dark); margin-bottom: 8px;">Beheerderssectie</h3>
           <div style="margin-bottom: 12px;">
-            <a href="https://docs.google.com/spreadsheets/d/1uFEJ3hBNIQRac3587Zp8pEvRygNYsxjrrv0KvLLAOVg/edit?usp=drive_link" target="_blank" class="quick-link-btn">🔗 link naar : beheersheet</a>
+            <button type="button" onclick="openExternalLink('https://docs.google.com/spreadsheets/d/1uFEJ3hBNIQRac3587Zp8pEvRygNYsxjrrv0KvLLAOVg/edit?usp=drive_link')" class="quick-link-btn">🔗 link naar : beheersheet</button>
           </div>
           <label for="beheerderOpmerking">Beheerder(s)‑opmerkingen</label>
           <span class="hint" style="margin-bottom: 6px; display: block;">Alleen invullen door planner / beheerder. Vrijwilligers laten dit veld leeg.</span>
@@ -764,6 +759,11 @@
   </nav>
 
   <script>
+    // Universal helper function to guarantee opening external URLs outside PWA webview
+    function openExternalLink(url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
     // STAP 2 Checklist materialen
     const materialen = [
       "Veiligheidsbril", "Trui / t shirt lange mouwen", "Goed aan sluitende handschoenen", 
@@ -773,16 +773,22 @@
       "Markeerlint of woldraad voor te snoeien takken", "Fruitladder", "Gereedschap gereinigd en ontsmet met spiritus"
     ];
 
+    // STAP 4 Ondergrond lijst (checkboxes)
+    const ondergrondLijst = [
+      "Gras", "Bladmulch", "Houtsnippers", "Bestrating", 
+      "Beplante boomspiegel", "Worteldoek", "Kale grond"
+    ];
+
     // STAP 5 Gebreken
     const gebrekenLijst = [
       "Je kan geen pet door de boom heen gooien (doorzicht)", "Plakoksel aanwezig", 
       "Gesteltakken niet duidelijk aanwezig", "Takken hangen op of tot de grond", 
       "Tak is te zwaar (uitscheurrisico)", "Opschot uit de grond aanwezig", "Dode takken aanwezig", 
       "Tak heeft bastbeschadiging / verwonding", "Kruisende takken aanwezig", "Schieters aanwezig", 
-      "Boom geeft hinder aan andere bomen of objecten", "Tak groeit naar binnen", 
+      "Boom geeft hinder aan andere bomen of objecten", "Tak groeit te binnen", 
       "Beschadigingen aan de bast zichtbaar", "Dubbele top aanwezig", "Top groeit te hoog door", 
       "Top verwijderd in verleden → nieuwe top geselecteerd", "Waterloten aanwezig (takken recht omhoog)", 
-      "Boom heeft hinder van andere bomen or objecten", "Geen van bovenstaande of Geen gebreken"
+      "Boom heeft hinder van andere bomen of objecten", "Geen van bovenstaande of Geen gebreken"
     ];
 
     const omgevingsLijst = [
@@ -813,6 +819,7 @@
     window.onload = () => {
       document.getElementById('snoeidatum').valueAsDate = new Date();
       renderChecklist('materialenChecklist', materialen, 'mat');
+      renderChecklist('ondergrondGrid', ondergrondLijst, 'ond');
       renderChecklist('gebrekenGrid', gebrekenLijst, 'geb');
       renderChecklist('omgevingGrid', omgevingsLijst, 'omg');
       renderChecklist('ziektenGrid', ziektenLijst, 'ziek');
@@ -956,7 +963,7 @@
         observatieVoor: formData.get('observatieVoor'),
         stamhoogte: formData.get('stamhoogte'),
         boomvorm: formData.get('boomvorm'),
-        ondergrond: formData.get('ondergrond'),
+        ondergrond: getCheckedValues('ond_'),
         levensfase: formData.get('levensfase'),
         gebreken: getCheckedValues('geb_'),
         omgevingsfactoren: getCheckedValues('omg_'),
