@@ -1,76 +1,71 @@
-<!-- HTML knoppen en formulieren staan hierboven -->
+<script>
+  function submitForm() {
+    const form = document.getElementById('snoeiForm');
+    const formData = new FormData(form);
 
-  <!-- HIER BEGINT HET SCRIPT -->
-  <script>
-    function submitForm() {
-      const form = document.getElementById('snoeiForm');
-      const formData = new FormData(form);
+    const verzameldeData = {
+      datumTijdstip: new Date().toISOString(),
+      vrijwilliger: formData.get('vrijwilliger'),
+      snoeidatum: formData.get('snoeidatum'),
+      materialenChecklist: getCheckedValues('mat_'),
+      ontbrekendMateriaal: formData.get('ontbrekendMateriaal') || '',
+      boomnummer: formData.get('boomnummer'),
+      vak: formData.get('vak'),
+      planttype: formData.get('planttype'),
+      status: formData.get('status'),
+      soort: formData.get('soort'),
+      ras: formData.get('ras'),
+      latijnseNaam: formData.get('latijnseNaam'),
+      kenmerk: formData.get('kenmerk'),
+      extraKenmerk: formData.get('extraKenmerk'),
+      observatieVoor: formData.get('observatieVoor'),
+      stamhoogte: formData.get('stamhoogte'),
+      boomvorm: formData.get('boomvorm'),
+      ondergrond: getCheckedValues('ond_'),
+      levensfase: formData.get('levensfase'),
+      gebreken: getCheckedValues('geb_'),
+      omgevingsfactoren: getCheckedValues('omg_'),
+      ziekten: getCheckedValues('ziek_'),
+      ingrepen: getCheckedValues('ingr_'),
+      typeSnoei: formData.get('typeSnoei'),
+      snoeiIntensiteit: formData.get('snoeiIntensiteit'),
+      volgendeSnoei: formData.get('volgendeSnoei'),
+      isBeheerder: formData.get('isBeheerder'),
+      beheerderOpmerking: formData.get('beheerderOpmerking') || '',
+      fotos: fotoStorage
+    };
 
-      const verzameldeData = {
-        datumTijdstip: new Date().toISOString(),
-        vrijwilliger: formData.get('vrijwilliger'),
-        snoeidatum: formData.get('snoeidatum'),
-        materialenChecklist: getCheckedValues('mat_'),
-        ontbrekendMateriaal: formData.get('ontbrekendMateriaal') || '',
-        boomnummer: formData.get('boomnummer'),
-        vak: formData.get('vak'),
-        planttype: formData.get('planttype'),
-        status: formData.get('status'),
-        soort: formData.get('soort'),
-        ras: formData.get('ras'),
-        latijnseNaam: formData.get('latijnseNaam'),
-        kenmerk: formData.get('kenmerk'),
-        extraKenmerk: formData.get('extraKenmerk'),
-        observatieVoor: formData.get('observatieVoor'),
-        stamhoogte: formData.get('stamhoogte'),
-        boomvorm: formData.get('boomvorm'),
-        ondergrond: getCheckedValues('ond_'),
-        levensfase: formData.get('levensfase'),
-        gebreken: getCheckedValues('geb_'),
-        omgevingsfactoren: getCheckedValues('omg_'),
-        ziekten: getCheckedValues('ziek_'),
-        ingrepen: getCheckedValues('ingr_'),
-        typeSnoei: formData.get('typeSnoei'),
-        snoeiIntensiteit: formData.get('snoeiIntensiteit'),
-        volgendeSnoei: formData.get('volgendeSnoei'),
-        isBeheerder: formData.get('isBeheerder'),
-        beheerderOpmerking: formData.get('beheerderOpmerking') || '',
-        fotos: fotoStorage
-      };
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwan7xmtqlScwlXtH5sf1CNIXZs8NGSc42rpQxkCK9SjYJ1Ffr15PHcN8Vu536jRX/exec";
 
-      const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwan7xmtqlScwlXtH5sf1CNIXZs8NGSc42rpQxkCK9SjYJ1Ffr15PHcN8Vu536jRX/exec";
+    const btnNext = document.getElementById('btnNext');
+    btnNext.disabled = true;
+    btnNext.textContent = 'Verzenden naar database...';
 
-      const btnNext = document.getElementById('btnNext');
-      btnNext.disabled = true;
-      btnNext.textContent = 'Verzenden naar database...';
+    fetch(GOOGLE_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(verzameldeData)
+    })
+    .then(() => {
+      setTimeout(() => {
+        alert("✅ Snoeiverslag succesvol opgeslagen in de sheet!");
+        location.reload();
+      }, 1500);
+    })
+    .catch(err => {
+      console.error(err);
+      alert("⚠️ Gegevens konden niet worden verstuurd. Controleer je internetverbinding.");
+      btnNext.disabled = false;
+      btnNext.textContent = 'Opnieuw Proberen';
+    });
+  }
 
-      fetch(GOOGLE_SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(verzameldeData)
-      })
-      .then(() => {
-        setTimeout(() => {
-          alert("✅ Snoeiverslag succesvol opgeslagen in de sheet!");
-          location.reload();
-        }, 1500);
-      })
-      .catch(err => {
-        console.error(err);
-        alert("⚠️ Gegevens konden niet worden verstuurd. Controleer je internetverbinding.");
-        btnNext.disabled = false;
-        btnNext.textContent = 'Opnieuw Proberen';
-      });
-    }
-
-    function getCheckedValues(prefix) {
-      const matches = [];
-      document.querySelectorAll(`input[type="checkbox"][name^="${prefix}"]:checked`).forEach(cb => {
-        matches.push(cb.value);
-      });
-      return matches.join(', ');
-    }
-  </script>
-</body>
-</html>
+  function getCheckedValues(prefix) {
+    const matches = [];
+    document.querySelectorAll(`input[type="checkbox"][name^="${prefix}"]:checked`).forEach(cb => {
+      matches.push(cb.value);
+    });
+    return matches.join(', ');
+  }
+</script>
