@@ -34,8 +34,7 @@ function submitForm() {
         fotos: fotoStorage
       };
 
-      // PLAK HIER JOUW NIEUWE GOOGLE APPS SCRIPT WEB APP URL
-      const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwaN7xmtqlScwlXtH5sf1CNIXZs8NGSc4i2rpQxkCkY9SjYJ1Ffr15PHcN8Vu536jRX/exec";
+      const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwan7xmtqlScwlXtH5sf1CNIXZs8NGSc42rpQxkCK9SjYJ1Ffr15PHcN8Vu536jRX/exec";
 
       const btnNext = document.getElementById('btnNext');
       btnNext.disabled = true;
@@ -48,7 +47,6 @@ function submitForm() {
         body: JSON.stringify(verzameldeData)
       })
       .then(() => {
-        // Korte vertraging om de dataoverdracht lokaal netjes af te ronden
         setTimeout(() => {
           alert("✅ Snoeiverslag succesvol opgeslagen in de sheet!");
           location.reload();
