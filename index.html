@@ -1,4 +1,8 @@
-function submitForm() {
+<!-- HTML knoppen en formulieren staan hierboven -->
+
+  <!-- HIER BEGINT HET SCRIPT -->
+  <script>
+    function submitForm() {
       const form = document.getElementById('snoeiForm');
       const formData = new FormData(form);
 
@@ -59,3 +63,14 @@ function submitForm() {
         btnNext.textContent = 'Opnieuw Proberen';
       });
     }
+
+    function getCheckedValues(prefix) {
+      const matches = [];
+      document.querySelectorAll(`input[type="checkbox"][name^="${prefix}"]:checked`).forEach(cb => {
+        matches.push(cb.value);
+      });
+      return matches.join(', ');
+    }
+  </script>
+</body>
+</html>
